@@ -11,8 +11,8 @@ Pour un fonctionnement optimal, je vous conseille de réaliser tout ce qui va su
 
 Vous pouvez retrouver l'intégralité du fichier dans le repo.
 
-On initialise le Vagrantfile avec un _Ubuntu 16.04_.
-`vagrant init ubuntu/xenial64`
+On initialise le Vagrantfile avec un _Ubuntu 14.04_.
+`vagrant init ubuntu/trusty64`
 
 On mappe le port 80 de la Vagrant au port 8080 de notre localhost de manière à pouvoir accéder à notre serveur web une fois que celui-ci sera provisionné.
 `config.vm.network "forwarded_port", guest: 80, host: 8080`
