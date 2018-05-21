@@ -10,4 +10,4 @@
     - name: install mysql
       apt: name=mysql-server state=present
     - name: install php
-      apt: name=php7.2 state=present
+      apt: name=php7.0 state=present
