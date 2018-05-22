@@ -1,0 +1,30 @@
+---
+- name: Install apache
+  apt: name=apache2 state=present
+
+- name: Create websites directory
+  file: 
+    path=/vagrant/sites 
+    state=directory
+
+- name: Use local template for virtualhost on webserver
+  template:
+    src=vhost.conf.j2
+    dest=/etc/apache2/sites-available/localroot.conf
+  notify:
+    - reload apache
+
+- name: Remove default apache virtualhost
+  file:
+    path=/etc/apache2/sites-enabled/000-default.conf
+    state=absent
+  notify:
+    - reload apache
+
+- name: Enable our virtualhost
+  file:
+    src=/etc/apache2/sites-available/localroot.conf
+    dest=/etc/apache2/sites-enabled/localroot.conf
+    state=link
+  notify:
+    - reload apache
