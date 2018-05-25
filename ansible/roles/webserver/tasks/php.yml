@@ -1,8 +1,8 @@
 ---
-- name: install php
-  apt: name=php7.0 state=present
-
-- name: Install mysql module for php
-  apt: name=php7.0-mysql state=present
+- name: install php and modules
+  apt: name={{ item }} state=present
+  with_items:
+    - php7.0
+    - php7.0-mysql
   notify:
     - reload apache

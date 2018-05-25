@@ -1,9 +1,9 @@
 ---
-- name: Install apache
+- name: Install apache & modules
   apt: name=apache2 state=present
-
-- name: Install apache2 php module
-  apt: name=libapache2-mod-php7.0 state=present
+  with_items:
+    - apache2
+    - libapache2-mod-php7.0
 
 - name: Enabled mod_rewrite
   apache2_module: name=rewrite state=present
