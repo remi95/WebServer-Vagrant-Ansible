@@ -1,3 +1,8 @@
 ---
 - name: install php
   apt: name=php7.0 state=present
+
+- name: Install mysql module for php
+  apt: name=php7.0-mysql state=present
+  notify:
+    - reload apache

@@ -5,6 +5,11 @@
 - name: Install apache2 php module
   apt: name=libapache2-mod-php7.0 state=present
 
+- name: Enabled mod_rewrite
+  apache2_module: name=rewrite state=present
+  notify:
+    - reload apache
+
 - name: Create websites directory
   file: 
     path=/vagrant/sites 
