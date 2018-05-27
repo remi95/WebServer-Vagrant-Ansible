@@ -5,14 +5,29 @@
     - mysql-server
     - mysql-client
     - python3-dev
+    - python-mysqldb
+    - libmysqlclient-dev
   notify:
     - reload mysql
 
+- name: Install pip
+  apt: name=python3-pip state=present
+
+- name: Install mysqlclient with pip
+  pip: name=mysqlclient
+
 - name: Create user for mysql with all right
   mysql_user:
-    name="{{ mysql_username }}"
-    password="{{ mysql_password }}"
+    name={{ mysql_username }}
+    password={{ mysql_password }}
     priv='*.*:ALL,GRANT'
     state=present
   notify:
     - reload mysql
+
+- name: Import database
+  mysql_db:
+    state: import
+    name: "{{ database_name }}"
+    target: /vagrant/sites/{{ database_name }}.sql
+

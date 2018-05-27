@@ -4,3 +4,9 @@
     name: mysql 
     state: reloaded
     enabled: true
+
+- name : reload apache
+  service: 
+    name: apache2
+    state: reload
+    enabled: true
