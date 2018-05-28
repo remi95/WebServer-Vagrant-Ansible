@@ -1,4 +1,8 @@
 ---
 mysql_username: sekoume
 mysql_password: sekoume
-database_name: user
+ # dirname: path from the shared dir to sql file
+ # filename: sql filename without '.sql'
+databases:
+  - {dirname: portfolio-symfony, filename: portfolio} 
+  - {dirname: python-website, filename: serrure}

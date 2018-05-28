@@ -1,2 +1,7 @@
 ---
-document_root: /vagrant/sites
+# document_root: /vagrant/sites
+
+apache_vhosts:
+  - {servername: dev.management.loc, document_root: /vagrant/sites/management}
+  - {servername: dev.portfolio.loc, document_root: /vagrant/sites/portfolio-symfony}
+  - {servername: dev.serrure.loc, document_root: /vagrant/sites/python-website}

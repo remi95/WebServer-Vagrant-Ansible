@@ -1,6 +1,6 @@
 ---
 - name: Install apache & modules
-  apt: name=apache2 state=present
+  apt: name={{item}} state=present
   with_items:
     - apache2
     - libapache2-mod-php7.0
@@ -15,10 +15,18 @@
     path=/vagrant/sites 
     state=directory
 
+- name: Add the user 'vagrant' to the group 'www-data'
+  user: 
+    name: vagrant
+    groups: www-data
+    append: yes
+
 - name: Use local template for virtualhost on webserver
   template:
     src=vhost.conf.j2
-    dest=/etc/apache2/sites-available/localroot.conf
+    dest=/etc/apache2/sites-available/{{item.servername}}.conf
+  with_items:
+    - "{{apache_vhosts}}"
   notify:
     - reload apache
 
@@ -29,10 +37,20 @@
   notify:
     - reload apache
 
-- name: Enable our virtualhost
+- name: Enable virtualhosts
   file:
-    src=/etc/apache2/sites-available/localroot.conf
-    dest=/etc/apache2/sites-enabled/localroot.conf
+    src=/etc/apache2/sites-available/{{item.servername}}.conf
+    dest=/etc/apache2/sites-enabled/{{item.servername}}.conf
     state=link
+  with_items:
+    - "{{apache_vhosts}}"
   notify:
     - reload apache
+
+- name: Add servernames in hosts
+  lineinfile:
+    dest: /etc/hosts
+    state: present
+    line: "127.0.0.1 {{item.servername}}"
+  with_items:
+    - "{{apache_vhosts}}"

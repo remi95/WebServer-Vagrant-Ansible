@@ -24,4 +24,4 @@
     path: /etc/apache2/apache2.conf
     line: "Include /etc/phpmyadmin/apache.conf"
   notify:
-      - reload mysql
+    - reload apache

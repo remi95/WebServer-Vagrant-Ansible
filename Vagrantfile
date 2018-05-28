@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 #Host_path
-HOST_PATH = "/mnt/c/Users/charles/web/"
+# HOST_PATH = "/mnt/c/Users/charles/web/"
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
-  config.vm.network "forwarded_port", guest: 80, host: 5656
+  # config.vm.network "forwarded_port", guest: 80, host: 8081
 
   config.vm.provision :ansible do |ansible|
     ansible.playbook = "ansible/playbook.yml"
@@ -38,7 +38,7 @@ Vagrant.configure("2") do |config|
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  # config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.225.30"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
@@ -68,6 +68,7 @@ Vagrant.configure("2") do |config|
   # View the documentation for the provider you are using for more
   # information on available options.
 
+
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
@@ -75,5 +76,5 @@ Vagrant.configure("2") do |config|
   #   apt-get update
   #   apt-get install -y apache2
   # SHELL
-  config.vm.synced_folder HOST_PATH, "/vagrant/sites"
+  config.vm.synced_folder "sites", "/vagrant/sites"
 end

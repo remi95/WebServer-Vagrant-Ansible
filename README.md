@@ -1,83 +1,91 @@
+# Serveur web avec Vagrant et Ansible
+
+Un simple `vagrant up` et vous voilà muni d'un serveur web simple et préconfiguré. 
+
 ## Prérequis 
 
-Pour réaliser la suite de ce guide, vous aurez besoin de :
+Pour l'utiliser, vous aurez besoin de :
 - [Vagrant](https://www.vagrantup.com/downloads.html)
 - [Ansible](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
-Pour un fonctionnement optimal, je vous conseille de réaliser tout ce qui va suivre sur un environnement Linux.
+Pour un fonctionnement optimal, je vous conseille de réaliser tout ce qui va suivre sur un environnement **Linux**.
 
-## Configuration du Vagrantfile
+## Caractéristiques du Serveur
 
-Vous pouvez retrouver l'intégralité du fichier dans le repo.
+Le serveur se trouve sur un **Ubuntu 16.04**.   
+Les éléments suivants sont installés :
+- apache2
+- libapache2-mod-php7.0
+- php7.0
+- php7.0-mysql
+- mysql-server
+- mysql-client
+- phpmyadmin
+- python3-dev
+- python-mysqldb
+- libmysqlclient-dev
 
-On initialise le Vagrantfile avec un _Ubuntu 16.04_.
-`vagrant init ubuntu/xenial64`
+On notera que le module _mod_rewrite_ d'apache est aussi activé.   
+Vous disposez ainsi des éléments de bases pour faire fonctionner un serveur web.  
 
-On mappe le port 80 de la Vagrant au port 8080 de notre localhost de manière à pouvoir accéder à notre serveur web une fois que celui-ci sera provisionné.
-`config.vm.network "forwarded_port", guest: 80, host: 8080`
+Les fichiers que vous éditez sur votre machine hôte sont directement **synchronisés** sur la machine virtuelle. Vous pouvez donc développer sereinement, Vagrant se charge du reste !
 
-Maintenant, il faut dire à Vagrant que l'on veut utiliser Ansible comme provisionneur, on pointe donc vers le fichier **playbook.yml**.
+## Utilisation
+
+Lancer simplement la commande suivante :    
+`vagrant up`
+
+## Ajout de votre site
+
+#### Ajout du dossier
+
+Par défaut, tous les fichiers se trouvant dans _sites/_ seront synchronisés sur le serveur dans _/vagrant/sites_.   
+Pour placer un nouveau site sur votre serveur, vous n'avez qu'à mettre votre dossier dans _sites/**mon_site**_.  
+Si toutefois vous désirez placer votre site ailleurs que dans _sites/_, vous pouvez toujours modifier le **Vagrantfile** à cet endroit : 
 ```ruby
-config.vm.provision :ansible do |ansible|
-    ansible.playbook = "ansible/playbook.yml"
-end
+  config.vm.synced_folder "sites", "/vagrant/sites"
 ```
 
-## Configuration du playbook
+#### Ajout d'un virtualhost
 
-Un fichier playbook Ansible peut permettre d'effectuer des tâches sur plusieurs serveurs que l'on peut lister. Ici, on indique l'option **all** qui permet de dire à Ansible : "Effectue les tâches suivantes sur tous les serveurs que tu connais". Etant donné que notre Ansible est relié à une Vagrant, il effectuera ses tâches sur ladite Vagrant.    
-
-Puisque nous allons effectuer des commandes systèmes nécessitant un accès privilégié, nous indiquons que les commandes seront effectuées en **sudo**.
-
+Il est très facile d'ajouter un virtualhost, rendez vous simplement dans le fichier _ansible/roles/webserver/vars/**main.yml**_ et ajoutez une ligne dans **apache_vhosts** en l'adaptant à votre site.
 ```yaml
-- hosts: all
-  sudo: true
+apache_vhosts:
+  - {servername: dev.example.loc, document_root: /vagrant/sites/example}
+  - {servername: dev.your-servername.loc, document_root: /vagrant/sites/your-dirname}
+```
+
+Par la suite, n'oubliez pas sur votre machine hôte d'éditez le fichier _/etc/**hosts** et d'y placer la ligne suivante :
+```bash
+192.168.225.30	dev.your-servername.loc
+```
+
+L'adresse IP est celle donnée par défaut dans le _Vagrantfile_, mais vous pouvez la changer si vous le voulez.
+
+#### Accès à PhpMyAdmin
+
+PhpMyAdmin est installé sur la machine virtuelle. Pour y accéder, vous pouvez utiliser n'importe quelle adresse renseignée plus haut pour l'adresse IP du serveur suivie de **/phpmyadmin**.    
+Personnalisez vos identifiants d'accès à la base de données dans le fichier _ansible/roles/database/vars/**main.yml**_.
+
+#### Ajout d'un fichier SQL à importer
+
+Si vous disposez d'un fichier SQL que vous souhaitez directement importer dans la base de données, vous n'avez qu'à le placer à la racine de votre site. Ensuite, rendez-vous dans _ansible/roles/database/vars/**main.yml**_ et ajoutez une ligne dans **databases** en l'adaptant à votre fichier.
+```yaml
+ # dirname: chemin jusqu'à votre fichier .sql à partir de sites/
+ # filename: nom du fichier sans le '.sql'
+databases:
+  - {dirname: example-website, filename: example} 
+  - {dirname: my-dir-website, filename: my-sql-filename}
   ```
 
-On créer des rôles qui permettent de mieux classifier nos différentes tâches, installations et configurations. Dans notre cas, on créer deux rôles : **webserver** et **database**. Chaque rôle est représenté dans par un dossier du même nom. Il nous suffit ensuite d'inclure ces rôles dans le fichier _playbook.yml_.
-
+Attention, si jamais vous n'avez pas placé votre site dans _sites/_, l'import ne fonctionnera pas. Je vous invite donc à modifier le fichier _ansible/roles/database/tasks/**mysql.yml**_ au niveau de la ligne **target** pour l'adapter au chemin jusqu'à votre site.
 ```yaml
-- hosts: all
-  sudo: true
-  vars:
-    document_root: /vagrant
-  pre_tasks:
-    - name: update apt cache
-      apt: update_cache=yes
-  roles:
-    - webserver
-    - database
+  - name: Import database
+  mysql_db:
+    state: import
+    name: "{{ item.filename }}"
+    target: /vagrant/sites/{{item.dirname}}/{{ item.filename }}.sql
+  with_items:
+    - "{{databases}}"
 ```
-
-Il faut savoir qu'Ansible exécute d'abord les rôles avant les tâches décrite dans le fichier playbook.yml. C'est pourquoi ici nous plaçons l'update du cache en **pre_tasks**. Ainsi, toutes les tâches ici présentes s'effectueront en premier. 
-
-On a donc un dossier _roles_ dans lequel on retrouve les dossiers _webserver_ et _database_, qui sont nos rôles.   
-Pour chaque rôle, Ansible va regarder dans le fichier situé dans _my-role-dir/tasks/**main.yml**_ pour connaître les tâches à exécuter. Dans l'exemple de notre rôle webserver, nous incluons les fichiers _apache.yml_ et _php.yml_, qui se trouvent dans le même dossier.
-
-```yaml
-- include: apache.yml
-- include: php.yml
-```
-
-En soit, il serait tout à fait possible d'écrire directement toutes les tâches que l'on veut exécuter dans le fichier _main_, mais nous préférons séparer l'installation et la configuration d'apache et de php. De manière générale, c'est une bonne pratique, pour des raisons d'évolutivité et de modularité.
-
- ```yaml
-# php.yml
-
-- name: install php
-  apt: name=php7.0 state=present
- ```
-
-  ```yaml
-# apache.yml
-
-- name: install php
-  apt: name=php7.0 state=present
- ```
-
-
-
- , nous précisons un nom (ce que l'on veut, cela nous permet d'identifier facilement son rôle), ainsi que le module utilisé, ici apt.    
-Ce module prend en compte une série d'options auxquelles on passe des valeurs.   
-Ici, on installe donc très facilement Apache2, mySql et php. 

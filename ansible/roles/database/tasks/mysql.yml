@@ -8,7 +8,7 @@
     - python-mysqldb
     - libmysqlclient-dev
   notify:
-    - reload mysql
+    - restart mysql
 
 - name: Install pip
   apt: name=python3-pip state=present
@@ -23,11 +23,12 @@
     priv='*.*:ALL,GRANT'
     state=present
   notify:
-    - reload mysql
+    - restart mysql
 
 - name: Import database
   mysql_db:
     state: import
-    name: "{{ database_name }}"
-    target: /vagrant/sites/{{ database_name }}.sql
-
+    name: "{{ item.filename }}"
+    target: /vagrant/sites/{{item.dirname}}/{{ item.filename }}.sql
+  with_items:
+    - "{{databases}}"
