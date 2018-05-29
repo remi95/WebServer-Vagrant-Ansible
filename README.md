@@ -4,14 +4,14 @@ Un simple `vagrant up` et vous voilà muni d'un serveur web simple et préconfig
 
 ## Sommaire
 
-[Prérequis](#prerequis)     
-[Caractéristiques du serveur](#caracteristiques-du-serveur)     
+[Prérequis](#prérequis)     
+[Caractéristiques du serveur](#caractéristiques-du-serveur)     
 [Utilisation](#utilisation)     
 [Ajout de votre site](#ajout-de-votre-site)     
 - [Ajout du dossier](#ajout-du-dossier)
 - [Ajout d'un virtualhost](#ajout-dun-virtualhost)
-- [Accès à PhpMyAdmin](#acces-a-phpmyadmin)
-- [Ajout d'un fichier SQL à importer](#ajout-dun-fichier-sql-a-importer)
+- [Accès à PhpMyAdmin](#accès-à-phpmyadmin)
+- [Ajout d'un fichier SQL à importer](#ajout-dun-fichier-sql-à-importer)
 
 ## Prérequis 
 
