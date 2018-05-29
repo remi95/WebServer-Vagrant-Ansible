@@ -2,7 +2,18 @@
 
 Un simple `vagrant up` et vous voilà muni d'un serveur web simple et préconfiguré. 
 
-## Prérequis 
+## Sommaire
+
+1 - [Prérequis](##prerequis)
+2 - [Caractéristiques du serveur](##caracteristiques-du-serveur)
+3 - [Utilisation](##utilisation)
+4 - [Ajout de votre site](##ajout-de-votre-site)
+- a - [Ajout du dossier](####ajout-du-dossier)
+- b - [Ajout d'un virtualhost](####ajout-dun-virtualhost)
+- c - [Accès à PhpMyAdmin](####acces-a-phpmyadmin)
+- d - [Ajout d'un fichier SQL à importer](####ajout-dun-fichier-sql-a-importer)
+
+## 1 - Prérequis 
 
 Pour l'utiliser, vous aurez besoin de :
 - [Vagrant](https://www.vagrantup.com/downloads.html)
@@ -11,7 +22,7 @@ Pour l'utiliser, vous aurez besoin de :
 
 Pour un fonctionnement optimal, je vous conseille de réaliser tout ce qui va suivre sur un environnement **Linux**.
 
-## Caractéristiques du Serveur
+## 2 - Caractéristiques du Serveur
 
 Le serveur se trouve sur un **Ubuntu 16.04**.   
 Les éléments suivants sont installés :
@@ -31,14 +42,14 @@ Vous disposez ainsi des éléments de bases pour faire fonctionner un serveur we
 
 Les fichiers que vous éditez sur votre machine hôte sont directement **synchronisés** sur la machine virtuelle. Vous pouvez donc développer sereinement, Vagrant se charge du reste !
 
-## Utilisation
+## 3 - Utilisation
 
 Lancer simplement la commande suivante :    
 `vagrant up`
 
-## Ajout de votre site
+## 4 - Ajout de votre site
 
-#### Ajout du dossier
+#### a - Ajout du dossier
 
 Par défaut, tous les fichiers se trouvant dans _sites/_ seront synchronisés sur le serveur dans _/vagrant/sites_.   
 Pour placer un nouveau site sur votre serveur, vous n'avez qu'à mettre votre dossier dans _sites/**mon_site**_.  
@@ -47,7 +58,7 @@ Si toutefois vous désirez placer votre site ailleurs que dans _sites/_, vous po
   config.vm.synced_folder "sites", "/vagrant/sites"
 ```
 
-#### Ajout d'un virtualhost
+#### b - Ajout d'un virtualhost
 
 Il est très facile d'ajouter un virtualhost, rendez vous simplement dans le fichier _ansible/roles/webserver/vars/**main.yml**_ et ajoutez une ligne dans **apache_vhosts** en l'adaptant à votre site.
 ```yaml
@@ -63,12 +74,12 @@ Par la suite, n'oubliez pas sur votre machine hôte d'éditez le fichier _/etc/*
 
 L'adresse IP est celle donnée par défaut dans le _Vagrantfile_, mais vous pouvez la changer si vous le voulez.
 
-#### Accès à PhpMyAdmin
+#### c - Accès à PhpMyAdmin
 
 PhpMyAdmin est installé sur la machine virtuelle. Pour y accéder, vous pouvez utiliser n'importe quelle adresse renseignée plus haut pour l'adresse IP du serveur suivie de **/phpmyadmin**.    
 Personnalisez vos identifiants d'accès à la base de données dans le fichier _ansible/roles/database/vars/**main.yml**_.
 
-#### Ajout d'un fichier SQL à importer
+#### d - Ajout d'un fichier SQL à importer
 
 Si vous disposez d'un fichier SQL que vous souhaitez directement importer dans la base de données, vous n'avez qu'à le placer à la racine de votre site. Ensuite, rendez-vous dans _ansible/roles/database/vars/**main.yml**_ et ajoutez une ligne dans **databases** en l'adaptant à votre fichier.
 ```yaml
